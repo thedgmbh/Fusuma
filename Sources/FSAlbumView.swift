@@ -117,19 +117,20 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         
         PHPhotoLibrary.shared().register(self)
         setupAVCapture()
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(FSCameraView.willEnterForegroundNotification(_:)), name: NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
     }
-    override func didMoveToSuperview() {
-        super.didMoveToSuperview()
+    
+    func willEnterForegroundNotification(_ notification: Notification) {
+        
         startCamera()
     }
 
     deinit {
-        
+        NotificationCenter.default.removeObserver(self)
+        stopCamera()
         if PHPhotoLibrary.authorizationStatus() == PHAuthorizationStatus.authorized {
             PHPhotoLibrary.shared().unregisterChangeObserver(self)
         }
-        stopCamera()
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
