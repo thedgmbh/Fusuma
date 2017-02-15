@@ -51,6 +51,15 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
     var dragStartPos: CGPoint = CGPoint.zero
     let dragDiff: CGFloat     = 20.0
     
+    
+    //Camera Capture requiered properties
+    var videoDataOutput: AVCaptureVideoDataOutput!
+    var videoDataOutputQueue: DispatchQueue!
+    var previewLayer:AVCaptureVideoPreviewLayer!
+    var captureDevice : AVCaptureDevice!
+    let session = AVCaptureSession()
+    
+    
     static func instance() -> FSAlbumView {
         
         return UINib(nibName: "FSAlbumView", bundle: Bundle(for: self.classForCoder())).instantiate(withOwner: self, options: nil)[0] as! FSAlbumView
@@ -107,6 +116,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         }
         
         PHPhotoLibrary.shared().register(self)
+        setupAVCapture()
         
     }
     
@@ -115,6 +125,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         if PHPhotoLibrary.authorizationStatus() == PHAuthorizationStatus.authorized {
             PHPhotoLibrary.shared().unregisterChangeObserver(self)
         }
+        stopCamera()
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -528,6 +539,74 @@ private extension FSAlbumView {
     }
 }
 
+extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
+    func setupAVCapture(){
+        if AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) == .authorized {
+            session.sessionPreset = AVCaptureSessionPreset640x480
+            if #available(iOS 10.0, *) {
+                guard let device = AVCaptureDevice
+                    .defaultDevice(withDeviceType: .builtInWideAngleCamera,
+                                   mediaType: AVMediaTypeVideo,
+                                   position: .back) else{
+                                    return
+                }
+                captureDevice = device
+                
+            } else {
+                // Fallback on earlier versions
+                captureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+            }
+            beginSession()
+        }
+        
+    }
+    
+    func beginSession(){
+        var err : NSError? = nil
+        var deviceInput:AVCaptureDeviceInput?
+        do {
+            deviceInput = try AVCaptureDeviceInput(device: captureDevice)
+        } catch let error as NSError {
+            err = error
+            deviceInput = nil
+        }
+        if err != nil {
+            print("error: \(err?.localizedDescription)");
+        }
+        if self.session.canAddInput(deviceInput){
+            self.session.addInput(deviceInput);
+        }
+        
+        videoDataOutput = AVCaptureVideoDataOutput()
+        videoDataOutput.alwaysDiscardsLateVideoFrames=true
+        videoDataOutputQueue = DispatchQueue(label: "VideoDataOutputQueue")
+        videoDataOutput.setSampleBufferDelegate(self, queue:self.videoDataOutputQueue)
+        if session.canAddOutput(self.videoDataOutput){
+            session.addOutput(self.videoDataOutput)
+        }
+        videoDataOutput.connection(withMediaType: AVMediaTypeVideo).isEnabled = true
+        
+        self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
+        self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspect
+        
+        let rootLayer :CALayer = self.imageCropViewContainer.layer
+        rootLayer.masksToBounds = true
+        self.previewLayer.frame = rootLayer.bounds
+        rootLayer.addSublayer(self.previewLayer)
+        session.startRunning()
+    }
+    
+    func captureOutput(_ captureOutput: AVCaptureOutput!,
+                       didOutputSampleBuffer sampleBuffer: CMSampleBuffer!,
+                       from connection: AVCaptureConnection!) {
+        // do stuff here
+    }
+    
+    // clean up AVCapture
+    func stopCamera(){
+        session.stopRunning()
+    }
+}
 
 extension TimeInterval {
     func timeIntervalAsString(_ format : String = "mm:ss") -> String {

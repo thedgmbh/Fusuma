@@ -112,6 +112,8 @@ public class FusumaViewController: UIViewController {
     var mode: FusumaMode = .camera
     public var modeOrder: FusumaModeOrder = .libraryFirst
     var willFilter = true
+    
+    
 
     @IBOutlet weak var photoLibraryViewerContainer: UIView!
     @IBOutlet weak var cameraShotContainer: UIView!
@@ -347,6 +349,10 @@ public class FusumaViewController: UIViewController {
             default:
                 break
             }
+            self.dismiss(animated: true, completion: {
+                
+                
+            })
         }
     }
     
@@ -408,9 +414,7 @@ public class FusumaViewController: UIViewController {
             print("no image crop ")
             delegate?.fusumaImageSelected((view?.image)!, source: mode)
             
-            self.dismiss(animated: true, completion: {
-                self.delegate?.fusumaDismissedWithImage((view?.image)!, source: self.mode)
-            })
+           
         }
 
     }
@@ -577,3 +581,5 @@ private extension FusumaViewController {
         button.addBottomBorder(fusumaTintColor, width: 3)
     }
 }
+
+
