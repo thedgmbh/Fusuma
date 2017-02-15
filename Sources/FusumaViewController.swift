@@ -430,10 +430,8 @@ extension FusumaViewController: FSAlbumViewDelegate, FSCameraViewDelegate, FSVid
     // MARK: FSCameraViewDelegate
     func cameraShotFinished(_ image: UIImage) {
         
-        delegate?.fusumaImageSelected(image, source: mode)
         self.dismiss(animated: true, completion: {
-            
-            self.delegate?.fusumaDismissedWithImage(image, source: self.mode)
+            self.delegate?.fusumaImageSelected(image, source: self.mode)
         })
     }
     

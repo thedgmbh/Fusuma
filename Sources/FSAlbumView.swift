@@ -110,7 +110,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
 
         if images.count > 0 {
             
-            changeImage(images[0])
+//            changeImage(images[0])
             collectionView.reloadData()
             collectionView.selectItem(at: IndexPath(row: 0, section: 0), animated: false, scrollPosition: UICollectionViewScrollPosition())
         }
@@ -119,7 +119,10 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         setupAVCapture()
         
     }
-    
+    override func didMoveToSuperview() {
+        super.didMoveToSuperview()
+        startCamera()
+    }
 
     deinit {
         
@@ -307,7 +310,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         
         let asset = images[indexPath.row]
         delegate?.selectedAsset = asset
-        changeImage(asset)
+//        changeImage(asset)
         
         imageCropView.changeScrollable(true)
         
@@ -404,8 +407,6 @@ internal extension IndexSet {
 private extension FSAlbumView {
     
     func changeImage(_ asset: PHAsset) {
-        
-        self.imageCropView.image = nil
         self.phAsset = asset
         
         DispatchQueue.global(qos: .default).async(execute: {
@@ -437,7 +438,7 @@ private extension FSAlbumView {
                 self.imageManager = PHCachingImageManager()
                 if self.images != nil && self.images.count > 0 {
                     
-                    self.changeImage(self.images[0])
+//                    self.changeImage(self.images[0])
                 }
                 
                 DispatchQueue.main.async {
@@ -606,6 +607,14 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
     // clean up AVCapture
     func stopCamera(){
         session.stopRunning()
+    }
+    
+    func startCamera() -> Void {
+        let status = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+        
+        if status == AVAuthorizationStatus.authorized {
+            session.startRunning()
+        }
     }
 }
 
