@@ -591,7 +591,7 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
         self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
         
         let rootLayer :CALayer = self.imageCropViewContainer.layer
-//        rootLayer.masksToBounds = true
+        rootLayer.masksToBounds = true
         self.previewLayer.frame = self.frame
         rootLayer.addSublayer(self.previewLayer)
         session.startRunning()
