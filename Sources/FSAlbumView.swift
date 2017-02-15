@@ -546,18 +546,12 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
     func setupAVCapture(){
         if AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo) == .authorized {
             session.sessionPreset = AVCaptureSessionPreset640x480
-            if #available(iOS 10.0, *) {
-                guard let device = AVCaptureDevice
-                    .defaultDevice(withDeviceType: .builtInWideAngleCamera,
-                                   mediaType: AVMediaTypeVideo,
-                                   position: .back) else{
-                                    return
-                }
-                captureDevice = device
+            for device in AVCaptureDevice.devices() {
                 
-            } else {
-                // Fallback on earlier versions
-                captureDevice = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+                if let device = device as? AVCaptureDevice , device.position == AVCaptureDevicePosition.back {
+                    
+                    captureDevice = device
+                }
             }
             beginSession()
         }
@@ -584,9 +578,8 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
         
         videoDataOutput = AVCaptureVideoDataOutput()
-        videoDataOutput.alwaysDiscardsLateVideoFrames=true
-        videoDataOutputQueue = DispatchQueue(label: "VideoDataOutputQueue")
-        videoDataOutput.setSampleBufferDelegate(self, queue:self.videoDataOutputQueue)
+        videoDataOutput.alwaysDiscardsLateVideoFrames = true
+
         if session.canAddOutput(self.videoDataOutput){
             session.addOutput(self.videoDataOutput)
         }
@@ -600,9 +593,11 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
         rootLayer.masksToBounds = true
         self.previewLayer.frame = self.frame
         rootLayer.addSublayer(self.previewLayer)
+        flashConfiguration()
         session.startRunning()
     }
     
+
     func captureOutput(_ captureOutput: AVCaptureOutput!,
                        didOutputSampleBuffer sampleBuffer: CMSampleBuffer!,
                        from connection: AVCaptureConnection!) {
@@ -615,11 +610,37 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     func startCamera() -> Void {
-        let devices = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
-        if captureDevice != nil {
+        let status = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+        
+        if status == AVAuthorizationStatus.authorized {
+            
             session.startRunning()
+            
+        } else if status == AVAuthorizationStatus.denied || status == AVAuthorizationStatus.restricted {
+            
+            session.stopRunning()
         }
     }
+    
+    func flashConfiguration() {
+        
+        do {
+            
+            if let device = captureDevice {
+                
+                try device.lockForConfiguration()
+                
+                device.flashMode = AVCaptureFlashMode.off
+                device.unlockForConfiguration()
+                
+            }
+            
+        } catch _ {
+            
+            return
+        }
+    }
+
 }
 
 extension TimeInterval {
