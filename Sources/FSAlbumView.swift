@@ -15,6 +15,7 @@ import Photos
 
     func albumViewCameraRollUnauthorized()
     func albumViewCameraRollAuthorized()
+    var selectedAsset: PHAsset! { get set }
 }
 
 final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDelegate, PHPhotoLibraryChangeObserver, UIGestureRecognizerDelegate {
@@ -29,23 +30,6 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
     weak var delegate: FSAlbumViewDelegate? = nil
     
     var images: PHFetchResult<PHAsset>!
-    
-    let cachingImageManager = PHCachingImageManager()
-    
-    var assets = [PHAsset](){
-        willSet {
-            cachingImageManager.stopCachingImagesForAllAssets()
-        }
-        
-        didSet {
-            cachingImageManager.startCachingImages(for: self.assets,
-                                                            targetSize: PHImageManagerMaximumSize,
-                                                            contentMode: .aspectFit,
-                                                            options: nil
-            )
-        }
-    }
-
     var imageManager: PHCachingImageManager?
     var previousPreheatRect: CGRect = .zero
     let cellSize = CGSize(width: 100, height: 100)
@@ -309,7 +293,9 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        changeImage(images[(indexPath as NSIndexPath).row])
+        let asset = images[indexPath.row]
+        delegate?.selectedAsset = asset
+        changeImage(asset)
         
         imageCropView.changeScrollable(true)
         

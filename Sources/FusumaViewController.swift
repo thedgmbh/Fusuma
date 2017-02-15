@@ -101,6 +101,11 @@ public struct ImageMetadata {
 //@objc public class FusumaViewController: UIViewController, FSCameraViewDelegate, FSAlbumViewDelegate {
 public class FusumaViewController: UIViewController {
 
+    
+    // delegate var 
+    public var selectedAsset: PHAsset!
+
+    // calss vars
     public var hasVideo = false
     public var cropHeightRatio: CGFloat = 1
 
@@ -320,8 +325,34 @@ public class FusumaViewController: UIViewController {
     }
     
     @IBAction func doneButtonPressed(_ sender: UIButton) {
+        if let asset = selectedAsset {
+            switch asset.mediaType {
+            case .image:
+                sendImageToUser()
+            case .video:
+                
+                let options = PHVideoRequestOptions()
+                options.deliveryMode = .highQualityFormat
+                options.isNetworkAccessAllowed = true
+                
+                
+                PHImageManager.default().requestAVAsset(forVideo: asset, options: options, resultHandler: { (videoAsset, mix, info) in
+                    if let urlAsset = videoAsset as? AVURLAsset {
+                        let localVideoUrl = urlAsset.url
+                        self.delegate?.fusumaVideoCompleted(withFileURL: localVideoUrl)
+                    } else {
+                        return
+                    }
+                })
+            default:
+                break
+            }
+        }
+    }
+    
+    func sendImageToUser() -> Void {
         let view = albumView.imageCropView
-
+        
         if fusumaCropImage {
             let normalizedX = (view?.contentOffset.x)! / (view?.contentSize.width)!
             let normalizedY = (view?.contentOffset.y)! / (view?.contentSize.height)!
@@ -343,34 +374,34 @@ public class FusumaViewController: UIViewController {
                 let targetHeight = floor(CGFloat(self.albumView.phAsset.pixelHeight) * cropRect.height)
                 let dimensionW = max(min(targetHeight, targetWidth), 1024 * UIScreen.main.scale)
                 let dimensionH = dimensionW * self.getCropHeightRatio()
-
+                
                 let targetSize = CGSize(width: dimensionW, height: dimensionH)
                 
                 PHImageManager.default().requestImage(for: self.albumView.phAsset, targetSize: targetSize,
-                contentMode: .aspectFill, options: options) {
-                    result, info in
-                    
-                    DispatchQueue.main.async(execute: {
-                        self.delegate?.fusumaImageSelected(result!, source: self.mode)
-                        
-                        self.dismiss(animated: true, completion: {
-                            self.delegate?.fusumaDismissedWithImage(result!, source: self.mode)
-                        })
-
-                        let metaData = ImageMetadata(
-                            mediaType: self.albumView.phAsset.mediaType,
-                            pixelWidth: self.albumView.phAsset.pixelWidth,
-                            pixelHeight: self.albumView.phAsset.pixelHeight,
-                            creationDate: self.albumView.phAsset.creationDate,
-                            modificationDate: self.albumView.phAsset.modificationDate,
-                            location: self.albumView.phAsset.location,
-                            duration: self.albumView.phAsset.duration,
-                            isFavourite: self.albumView.phAsset.isFavorite,
-                            isHidden: self.albumView.phAsset.isHidden)
-
-                        self.delegate?.fusumaImageSelected(result!, source: self.mode, metaData: metaData)
-
-                    })
+                                                      contentMode: .aspectFill, options: options) {
+                                                        result, info in
+                                                        
+                                                        DispatchQueue.main.async(execute: {
+                                                            self.delegate?.fusumaImageSelected(result!, source: self.mode)
+                                                            
+                                                            self.dismiss(animated: true, completion: {
+                                                                self.delegate?.fusumaDismissedWithImage(result!, source: self.mode)
+                                                            })
+                                                            
+                                                            let metaData = ImageMetadata(
+                                                                mediaType: self.albumView.phAsset.mediaType,
+                                                                pixelWidth: self.albumView.phAsset.pixelWidth,
+                                                                pixelHeight: self.albumView.phAsset.pixelHeight,
+                                                                creationDate: self.albumView.phAsset.creationDate,
+                                                                modificationDate: self.albumView.phAsset.modificationDate,
+                                                                location: self.albumView.phAsset.location,
+                                                                duration: self.albumView.phAsset.duration,
+                                                                isFavourite: self.albumView.phAsset.isFavorite,
+                                                                isHidden: self.albumView.phAsset.isHidden)
+                                                            
+                                                            self.delegate?.fusumaImageSelected(result!, source: self.mode, metaData: metaData)
+                                                            
+                                                        })
                 }
             })
         } else {
@@ -381,11 +412,13 @@ public class FusumaViewController: UIViewController {
                 self.delegate?.fusumaDismissedWithImage((view?.image)!, source: self.mode)
             })
         }
+
     }
     
 }
 
 extension FusumaViewController: FSAlbumViewDelegate, FSCameraViewDelegate, FSVideoCameraViewDelegate {
+
     public func getCropHeightRatio() -> CGFloat {
         return cropHeightRatio
     }
