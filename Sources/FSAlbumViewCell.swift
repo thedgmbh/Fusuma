@@ -13,6 +13,14 @@ final class FSAlbumViewCell: UICollectionViewCell {
     
     @IBOutlet weak var imageView: UIImageView!
     
+    @IBOutlet weak var timeLabel: UILabel!
+    
+    var videoDuration: String? {
+        didSet{
+            timeLabel.text = videoDuration
+        }
+    }
+    
     var image: UIImage? {
         
         didSet {

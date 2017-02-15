@@ -29,6 +29,23 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
     weak var delegate: FSAlbumViewDelegate? = nil
     
     var images: PHFetchResult<PHAsset>!
+    
+    let cachingImageManager = PHCachingImageManager()
+    
+    var assets = [PHAsset](){
+        willSet {
+            cachingImageManager.stopCachingImagesForAllAssets()
+        }
+        
+        didSet {
+            cachingImageManager.startCachingImages(for: self.assets,
+                                                            targetSize: PHImageManagerMaximumSize,
+                                                            contentMode: .aspectFit,
+                                                            options: nil
+            )
+        }
+    }
+
     var imageManager: PHCachingImageManager?
     var previousPreheatRect: CGRect = .zero
     let cellSize = CGSize(width: 100, height: 100)
@@ -96,8 +113,8 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
             NSSortDescriptor(key: "creationDate", ascending: false)
         ]
         
-        images = PHAsset.fetchAssets(with: .image, options: options)
-        
+        images = PHAsset.fetchAssets(with: options)
+
         if images.count > 0 {
             
             changeImage(images[0])
@@ -112,13 +129,11 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
     deinit {
         
         if PHPhotoLibrary.authorizationStatus() == PHAuthorizationStatus.authorized {
-            
             PHPhotoLibrary.shared().unregisterChangeObserver(self)
         }
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        
         return true
     }
     
@@ -247,22 +262,35 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         let currentTag = cell.tag + 1
         cell.tag = currentTag
         
-        let asset = self.images[(indexPath as NSIndexPath).item]
-        self.imageManager?.requestImage(for: asset,
-            targetSize: cellSize,
-            contentMode: .aspectFill,
-            options: nil) {
-                result, info in
-                
-                if cell.tag == currentTag {
-                    cell.image = result
-                }
-                
+        let asset = self.images[indexPath.item]
+        if asset.mediaType == .image {
+            self.imageManager?.requestImage(for: asset,
+                                            targetSize: cellSize,
+                                            contentMode: .aspectFill,
+                                            options: nil) {
+                                                result, info in
+                                                if cell.tag == currentTag {
+                                                    cell.image = result
+                                                }
+                                                
+            }
+        }else if asset.mediaType == .video {
+            self.imageManager?.requestImage(for: asset,
+                                            targetSize: cellSize,
+                                            contentMode: .aspectFill,
+                                            options: nil) {
+                                                result, info in
+                                                if cell.tag == currentTag {
+                                                    cell.image = result
+                                                }
+            }
+            cell.videoDuration = asset.duration.timeIntervalAsString()
+            
         }
+       
         
         return cell
     }
-    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         
         return 1
@@ -512,4 +540,32 @@ private extension FSAlbumView {
         }
         return assets
     }
+}
+
+
+extension TimeInterval {
+    func timeIntervalAsString(_ format : String = "mm:ss") -> String {
+        var asInt   = NSInteger(self)
+        let ago = (asInt < 0)
+        if (ago) {
+            asInt = -asInt
+        }
+        let ms = Int(self.truncatingRemainder(dividingBy: 1) * (ago ? -1000 : 1000))
+        let s = asInt % 60
+        let m = (asInt / 60) % 60
+        let h = ((asInt / 3600))%24
+        let d = (asInt / 86400)
+        
+        var value = format
+        value = value.replacingOccurrences(of: "hh", with: String(format: "%0.2d", h))
+        value = value.replacingOccurrences(of: "mm",  with: String(format: "%0.2d", m))
+        value = value.replacingOccurrences(of: "sss", with: String(format: "%0.3d", ms))
+        value = value.replacingOccurrences(of: "ss",  with: String(format: "%0.2d", s))
+        value = value.replacingOccurrences(of: "dd",  with: String(format: "%d", d))
+        if (ago) {
+            value += " ago"
+        }
+        return value
+    }
+    
 }

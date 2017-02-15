@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina5_5" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -21,16 +21,25 @@
                     <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="eyB-Pn-Cz7">
                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                     </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="u87-ga-byM">
+                        <rect key="frame" x="47" y="47" width="0.0" height="0.0"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                        <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <nil key="highlightedColor"/>
+                    </label>
                 </subviews>
             </view>
             <constraints>
+                <constraint firstAttribute="trailing" secondItem="u87-ga-byM" secondAttribute="trailing" constant="3" id="4aj-Na-fTf"/>
                 <constraint firstAttribute="bottom" secondItem="eyB-Pn-Cz7" secondAttribute="bottom" id="7nt-Ev-pzc"/>
                 <constraint firstItem="eyB-Pn-Cz7" firstAttribute="leading" secondItem="xyV-m5-VJN" secondAttribute="leading" id="Tri-pb-OD8"/>
                 <constraint firstAttribute="trailing" secondItem="eyB-Pn-Cz7" secondAttribute="trailing" id="hLc-zq-PCS"/>
+                <constraint firstAttribute="bottom" secondItem="u87-ga-byM" secondAttribute="bottom" constant="3" id="kdq-pJ-y6f"/>
                 <constraint firstItem="eyB-Pn-Cz7" firstAttribute="top" secondItem="xyV-m5-VJN" secondAttribute="top" id="unD-44-W5K"/>
             </constraints>
             <connections>
                 <outlet property="imageView" destination="eyB-Pn-Cz7" id="OJW-qf-zy1"/>
+                <outlet property="timeLabel" destination="u87-ga-byM" id="1rW-t8-Bof"/>
             </connections>
             <point key="canvasLocation" x="252" y="306"/>
         </collectionViewCell>

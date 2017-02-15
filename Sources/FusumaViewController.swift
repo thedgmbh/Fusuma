@@ -47,9 +47,9 @@ public extension FusumaDelegate {
     func fusumaWillClosed() {}
 }
 
-public var fusumaBaseTintColor   = UIColor.hex("#FFFFFF", alpha: 1.0)
-public var fusumaTintColor       = UIColor.hex("#F38181", alpha: 1.0)
-public var fusumaBackgroundColor = UIColor.hex("#3B3D45", alpha: 1.0)
+public var fusumaBaseTintColor   = #colorLiteral(red: 0.9246133566, green: 0.9246349931, blue: 0.9246233106, alpha: 1)
+public var fusumaTintColor       = #colorLiteral(red: 0.8895000815, green: 0.8863819242, blue: 0.8894289136, alpha: 1)
+public var fusumaBackgroundColor = #colorLiteral(red: 0.8089966774, green: 0.3127281666, blue: 0.2721501291, alpha: 1)
 
 public var fusumaAlbumImage : UIImage? = nil
 public var fusumaCameraImage : UIImage? = nil
@@ -71,7 +71,7 @@ public var fusumaSavesImage: Bool = false
 public var fusumaCameraRollTitle = "CAMERA ROLL"
 public var fusumaCameraTitle = "PHOTO"
 public var fusumaVideoTitle = "VIDEO"
-public var fusumaTitleFont = UIFont(name: "AvenirNext-DemiBold", size: 15)
+public var fusumaTitleFont = UIFont.systemFont(ofSize: 15)
 
 public var fusumaTintIcons : Bool = true
 
