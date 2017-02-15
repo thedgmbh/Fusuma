@@ -117,7 +117,6 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         
         PHPhotoLibrary.shared().register(self)
         setupAVCapture()
-        NotificationCenter.default.addObserver(self, selector: #selector(FSCameraView.willEnterForegroundNotification(_:)), name: NSNotification.Name.UIApplicationWillEnterForeground, object: nil)
     }
     
     func willEnterForegroundNotification(_ notification: Notification) {
@@ -126,7 +125,6 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(self)
         stopCamera()
         if PHPhotoLibrary.authorizationStatus() == PHAuthorizationStatus.authorized {
             PHPhotoLibrary.shared().unregisterChangeObserver(self)
@@ -331,7 +329,6 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
     
     // MARK: - ScrollViewDelegate
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
         if scrollView == collectionView {
             self.updateCachedAssets()
         }
@@ -559,42 +556,49 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     func beginSession(){
-        var err : NSError? = nil
-        var deviceInput:AVCaptureDeviceInput?
-        
-        do {
-            deviceInput = try AVCaptureDeviceInput(device: captureDevice)
-        } catch let error as NSError {
-            err = error
-            deviceInput = nil
+        DispatchQueue.global(qos: .background).async { [weak self]
+            () -> Void in
+            var err : NSError? = nil
+            var deviceInput:AVCaptureDeviceInput?
+            
+            do {
+                deviceInput = try AVCaptureDeviceInput(device: self?.captureDevice)
+            } catch let error as NSError {
+                err = error
+                deviceInput = nil
+            }
+            
+            if err != nil {
+                print("error: \(err?.localizedDescription)");
+            }
+            
+            if (self?.session.canAddInput(deviceInput))!{
+                self?.session.addInput(deviceInput);
+            }
+            
+            self?.videoDataOutput = AVCaptureVideoDataOutput()
+            self?.videoDataOutput.alwaysDiscardsLateVideoFrames = true
+            
+            if (self?.session.canAddOutput(self?.videoDataOutput))!{
+                self?.session.addOutput(self?.videoDataOutput)
+            }
+            
+            self?.videoDataOutput.connection(withMediaType: AVMediaTypeVideo).isEnabled = true
+            
+            self?.previewLayer = AVCaptureVideoPreviewLayer(session: self?.session)
+            self?.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
+            
+            
+            DispatchQueue.main.async {
+                () -> Void in
+                let rootLayer :CALayer = self!.imageCropViewContainer.layer
+                rootLayer.masksToBounds = true
+                self?.previewLayer.frame = (self?.frame)!
+                rootLayer.addSublayer((self?.previewLayer)!)
+                self?.flashConfiguration()
+                self?.session.startRunning()
+            }
         }
-        
-        if err != nil {
-            print("error: \(err?.localizedDescription)");
-        }
-        
-        if self.session.canAddInput(deviceInput){
-            self.session.addInput(deviceInput);
-        }
-        
-        videoDataOutput = AVCaptureVideoDataOutput()
-        videoDataOutput.alwaysDiscardsLateVideoFrames = true
-
-        if session.canAddOutput(self.videoDataOutput){
-            session.addOutput(self.videoDataOutput)
-        }
-        
-        videoDataOutput.connection(withMediaType: AVMediaTypeVideo).isEnabled = true
-        
-        self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
-        self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
-        
-        let rootLayer :CALayer = self.imageCropViewContainer.layer
-        rootLayer.masksToBounds = true
-        self.previewLayer.frame = self.frame
-        rootLayer.addSublayer(self.previewLayer)
-        flashConfiguration()
-        session.startRunning()
     }
     
 
