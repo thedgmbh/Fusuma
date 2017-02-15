@@ -165,11 +165,11 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
                     
                     dragDirection = Direction.stop
                     
-                    imageCropView.changeScrollable(false)
+                    imageCropView?.changeScrollable(false)
                     
             } else {
                 
-                imageCropView.changeScrollable(true)
+                imageCropView?.changeScrollable(true)
             }
             
         } else if sender.state == UIGestureRecognizerState.changed {
@@ -207,7 +207,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
             
             if sender.state == UIGestureRecognizerState.ended && dragDirection == Direction.stop {
                 
-                imageCropView.changeScrollable(true)
+                imageCropView?.changeScrollable(true)
                 return
             }
             
@@ -216,7 +216,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
             if currentPos.y < cropBottomY - dragDiff && imageCropViewConstraintTop.constant != imageCropViewOriginalConstraintTop {
                 
                 // The largest movement
-                imageCropView.changeScrollable(false)
+                imageCropView?.changeScrollable(false)
                 
                 imageCropViewConstraintTop.constant = imageCropViewMinimalVisibleHeight - self.imageCropViewContainer.frame.height
                 
@@ -233,7 +233,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
             } else {
                 
                 // Get back to the original position
-                imageCropView.changeScrollable(true)
+                imageCropView?.changeScrollable(true)
                 
                 imageCropViewConstraintTop.constant = imageCropViewOriginalConstraintTop
                 collectionViewConstraintHeight.constant = self.frame.height - imageCropViewOriginalConstraintTop - imageCropViewContainer.frame.height
@@ -312,7 +312,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         delegate?.selectedAsset = asset
 //        changeImage(asset)
         
-        imageCropView.changeScrollable(true)
+        imageCropView?.changeScrollable(true)
         
         imageCropViewConstraintTop.constant = imageCropViewOriginalConstraintTop
         collectionViewConstraintHeight.constant = self.frame.height - imageCropViewOriginalConstraintTop - imageCropViewContainer.frame.height
@@ -422,8 +422,8 @@ private extension FSAlbumView {
                     
                     DispatchQueue.main.async(execute: {
                         
-                        self.imageCropView.imageSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
-                        self.imageCropView.image = result
+                        self.imageCropView?.imageSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+                        self.imageCropView?.image = result
                     })
             }
         })
@@ -566,15 +566,18 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
     func beginSession(){
         var err : NSError? = nil
         var deviceInput:AVCaptureDeviceInput?
+        
         do {
             deviceInput = try AVCaptureDeviceInput(device: captureDevice)
         } catch let error as NSError {
             err = error
             deviceInput = nil
         }
+        
         if err != nil {
             print("error: \(err?.localizedDescription)");
         }
+        
         if self.session.canAddInput(deviceInput){
             self.session.addInput(deviceInput);
         }
@@ -586,6 +589,7 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
         if session.canAddOutput(self.videoDataOutput){
             session.addOutput(self.videoDataOutput)
         }
+        
         videoDataOutput.connection(withMediaType: AVMediaTypeVideo).isEnabled = true
         
         self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
@@ -610,9 +614,8 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
     }
     
     func startCamera() -> Void {
-        let status = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
-        
-        if status == AVAuthorizationStatus.authorized {
+        let devices = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
+        if captureDevice != nil {
             session.startRunning()
         }
     }
