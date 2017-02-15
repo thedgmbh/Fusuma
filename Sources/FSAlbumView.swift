@@ -120,6 +120,7 @@ final class FSAlbumView: UIView, UICollectionViewDataSource, UICollectionViewDel
         
     }
     
+
     deinit {
         
         if PHPhotoLibrary.authorizationStatus() == PHAuthorizationStatus.authorized {
@@ -587,11 +588,11 @@ extension FSAlbumView: AVCaptureVideoDataOutputSampleBufferDelegate {
         videoDataOutput.connection(withMediaType: AVMediaTypeVideo).isEnabled = true
         
         self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
-        self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspect
+        self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
         
         let rootLayer :CALayer = self.imageCropViewContainer.layer
-        rootLayer.masksToBounds = true
-        self.previewLayer.frame = rootLayer.bounds
+//        rootLayer.masksToBounds = true
+        self.previewLayer.frame = self.frame
         rootLayer.addSublayer(self.previewLayer)
         session.startRunning()
     }

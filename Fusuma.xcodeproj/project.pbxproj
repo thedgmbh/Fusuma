@@ -144,7 +144,7 @@
 				TargetAttributes = {
 					52412A921CA6114A0073C4BE = {
 						CreatedOnToolsVersion = 7.3;
-						DevelopmentTeam = 4ZG9JNYCM5;
+						DevelopmentTeam = 85R85ZNGEX;
 						LastSwiftMigration = 0800;
 						ProvisioningStyle = Automatic;
 					};
@@ -307,10 +307,10 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = NO;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: abdelrahman mohamed (E68YKJ5M6G)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: abdelrahman mohamed (E68YKJ5M6G)";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 4ZG9JNYCM5;
+				DEVELOPMENT_TEAM = 85R85ZNGEX;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -332,10 +332,10 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = NO;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: abdelrahman mohamed (E68YKJ5M6G)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: abdelrahman mohamed (E68YKJ5M6G)";
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 4ZG9JNYCM5;
+				DEVELOPMENT_TEAM = 85R85ZNGEX;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
